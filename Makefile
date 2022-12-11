@@ -11,7 +11,7 @@ disasm: os-image kernel.bin
 os-image: asm/main.bin kernel.bin
 	cat $^ > os-image
 
-kernel.bin: kernel/kernel_entry.o ${OBJ}
+kernel.bin: kernel/kernel_entry.o kernel/low_level_asm.o ${OBJ}
 	ld -o $@ -Ttext 0x1000 $^ --oformat binary -melf_i386
 
 %.o: %.c ${HEADERS}
