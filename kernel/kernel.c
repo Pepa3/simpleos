@@ -3,5 +3,9 @@ void main(){
     clear_screen();
     
     print("Hello,World!\n");
-    print_hex(0x1239);
+    for(int i = 1; i < 24; i++){
+        print_hex(0xeecabeff);
+        print("\n");   
+    }
+    
 }

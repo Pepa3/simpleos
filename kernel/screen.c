@@ -26,6 +26,8 @@ void print_char(char character, int col, int row, char attribute_byte) {
 
     offset += 2;
 
+    offset = handle_scrolling(offset);
+
     set_cursor(offset);
 }
 
@@ -71,12 +73,24 @@ void print(char* message) {
     print_at(message, -1, -1);
 }
 
-void print_hex() {
-    char* hex = "0x00000000";
-    int num = 0x1234;
+int hex_shift(int n){
+    if(n>0x39){
+        n+=7;
+    }
+    return n;
+}
 
-    hex[2] = (char)((0xf000&num)+0x30);//0x1
-    hex[3] = (char)((0x0f00&num)+0x30);//0x1
+void print_hex(int num) {
+    char* hex = "0x00000000";
+
+    hex[9] = hex_shift((num&0xf)+0x30);
+    hex[8] = hex_shift((num>>4&0xf)+0x30);
+    hex[7] = hex_shift((num>>8&0xf)+0x30);
+    hex[6] = hex_shift((num>>12&0xf)+0x30);
+    hex[5] = hex_shift((num>>16&0xf)+0x30);
+    hex[4] = hex_shift((num>>20&0xf)+0x30);
+    hex[3] = hex_shift((num>>24&0xf)+0x30);
+    hex[2] = hex_shift((num>>28&0xf)+0x30);
 
     print(hex);
 }
@@ -119,7 +133,7 @@ int handle_scrolling(int cursor_offset) {
     for (i=0; i < MAX_COLS*2; i++) {
         last_line[i] = 0;
     }
-    
+
     cursor_offset -= 2*MAX_COLS;
 
     return cursor_offset;

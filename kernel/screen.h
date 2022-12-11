@@ -14,7 +14,7 @@ int get_screen_offset(int col, int row);
 void set_cursor(int offset);
 void print_at(char* message, int col, int row);
 void print(char* message);
-void print_hex();
+void print_hex(int num);
 void clear_screen();
 int handle_scrolling(int cursor_offset);
 #endif
