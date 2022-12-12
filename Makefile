@@ -1,5 +1,5 @@
 C_SOURCES = $(wildcard kernel/*.c)
-HEADERS = $(wildcard kernel/*.h)
+HEADERS = $(wildcard kernel/include/*.h)
 OBJ = ${C_SOURCES:.c=.o}
 
 all: os-image
@@ -15,7 +15,7 @@ kernel.bin: kernel/kernel_entry.o kernel/interrupt.o ${OBJ}
 	ld -o $@ -Ttext 0x1000 -melf_i386 $^ --oformat binary
 
 %.o: %.c ${HEADERS}
-	gcc -g -fno-pic -ffreestanding -nostdinc -m32 -Wall -Wextra -c $< -o $@ 
+	gcc -g -fno-pic -ffreestanding -nostdinc -m32 -Wall -Wextra -Ikernel/include -c $< -o $@ 
 
 %.o: %.asm
 	nasm $< -f elf32 -o $@

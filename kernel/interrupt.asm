@@ -1,4 +1,4 @@
-[bits 32]
+
 ;; Make our isr_handler() from isr.c available here
 [extern isr_handler]
 
