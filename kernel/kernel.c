@@ -1,7 +1,7 @@
-#include "kernel.h"
-#include "isr.h"
-#include "screen.h"
-#include "string.h"
+#include "include/kernel.h"
+#include "include/isr.h"
+#include "include/screen.h"
+#include "include/string.h"
 
 void kernel_main() {
   clear_screen();

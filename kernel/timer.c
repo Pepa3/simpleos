@@ -1,10 +1,10 @@
 // Implementation for Programmable Interval Timer
 // http://wiki.osdev.org/Programmable_Interval_Timer
 
-#include "timer.h"
-#include "isr.h"
-#include "ports.h"
-#include "function.h"
+#include "include/timer.h"
+#include "include/isr.h"
+#include "include/ports.h"
+#include "include/function.h"
 
 uint32_t tick = 0;
 

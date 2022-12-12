@@ -2,9 +2,9 @@
 // http://wiki.osdev.org/Printing_To_Screen
 // http://wiki.osdev.org/VGA_Hardware
 
-#include "screen.h"
-#include "ports.h"
-#include "mem.h"
+#include "include/screen.h"
+#include "include/ports.h"
+#include "include/mem.h"
 
 int print_char(char character, int col, int row, int attribute);
 int get_cursor_offset();

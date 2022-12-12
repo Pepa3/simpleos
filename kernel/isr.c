@@ -1,14 +1,14 @@
 // Implementation for Interrupt Service Routines
 // http://wiki.osdev.org/Interrupt_Service_Routines
 
-#include "isr.h"
-#include "idt.h"
-#include "ports.h"
-#include "timer.h"
-#include "keyboard.h"
-#include "screen.h"
-#include "mem.h"
-#include "string.h"
+#include "include/isr.h"
+#include "include/idt.h"
+#include "include/ports.h"
+#include "include/timer.h"
+#include "include/keyboard.h"
+#include "include/screen.h"
+#include "include/mem.h"
+#include "include/string.h"
 
 isr_t interrupt_handlers[256];
 
