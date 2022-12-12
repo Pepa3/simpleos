@@ -25,4 +25,4 @@ kernel.bin: asm/kernel_entry.o asm/interrupt.o ${OBJ}
 
 clean:
 	rm -fr *.bin *.dis *.o os-image
-	rm -fr kernel/*.o asm/*.bin
+	rm -fr kernel/*.o asm/*.bin asm/*.o
