@@ -11,18 +11,18 @@ disasm: os-image kernel.bin
 os-image: asm/main.bin kernel.bin
 	cat $^ > os-image
 
-kernel.bin: kernel/kernel_entry.o kernel/low_level_asm.o ${OBJ}
-	ld -o $@ -Ttext 0x1000 $^ --oformat binary -melf_i386
+kernel.bin: kernel/kernel_entry.o kernel/interrupt.o ${OBJ}
+	ld -o $@ -Ttext 0x1000 -melf_i386 $^ --oformat binary
 
 %.o: %.c ${HEADERS}
-	gcc -fno-pic -ffreestanding -c $< -o $@ -m32
+	gcc -g -fno-pic -ffreestanding -nostdinc -m32 -Wall -Wextra -c $< -o $@ 
 
 %.o: %.asm
 	nasm $< -f elf32 -o $@
 
 %.bin: %.asm
 	nasm $< -f bin -I 'asm/' -o $@
-	
+
 clean:
 	rm -fr *.bin *.dis *.o os-image
 	rm -fr kernel/*.o asm/*.bin
