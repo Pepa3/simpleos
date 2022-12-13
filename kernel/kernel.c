@@ -7,8 +7,6 @@ void kernel_main() {
   clear_screen();
   isr_install();
   irq_install();
-  print_char('X',2,2,0);
-  print_at("XY",2,3);
   set_cursor_offset(0);
   print("Type something, it will go through the kernel\n");
   print("Type END to halt the CPU\n> ");
