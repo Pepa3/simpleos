@@ -1,4 +1,4 @@
-#include "include/string.h"
+#include <string.h>
 
 void itoa(int n, char str[]) {
   int i, sign;

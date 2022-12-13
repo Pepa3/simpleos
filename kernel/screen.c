@@ -2,16 +2,10 @@
 // http://wiki.osdev.org/Printing_To_Screen
 // http://wiki.osdev.org/VGA_Hardware
 
-#include "include/screen.h"
-#include "include/ports.h"
-#include "include/mem.h"
-
-int print_char(char character, int col, int row, int attribute);
-int get_cursor_offset();
-int set_cursor_offset(int offset);
-int get_offset(int col, int row);
-int get_row_from_offset(int offset);
-int get_col_from_offset(int offset);
+#include <screen.h>
+#include <ports.h>
+#include <mem.h>
+#include <stddef.h>
 
 // Prints string at current position of the cursor
 void print(char *message) {
@@ -44,7 +38,7 @@ void print_backspace() {
   int offset = get_cursor_offset() - 2;
   int row = get_row_from_offset(offset);
   int col = get_col_from_offset(offset);
-  print_char(0x08, col, row, WHITE_ON_BLACK);
+  set_cursor_offset(print_char(' ', col, row, WHITE_ON_BLACK)-2);
 }
 
 // Clear the entire screen and positioning cursor to (0, 0)

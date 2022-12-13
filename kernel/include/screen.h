@@ -1,3 +1,5 @@
+#ifndef SCREEN_H_INC
+#define SCREEN_H_INC
 #include "stdint.h"
 
 // Address in memory which is mapped to video
@@ -19,7 +21,13 @@
 // Public API
 void print(char *message);
 void print_at(char *message, int col, int row);
-int print_char(char ch, int col, int row, int attrib);
-int set_cursor_offset(int offset);
 void print_backspace();
 void clear_screen();
+int print_char(char character, int col, int row, int attribute);
+int get_cursor_offset();
+int set_cursor_offset(int offset);
+int get_offset(int col, int row);
+int get_row_from_offset(int offset);
+int get_col_from_offset(int offset);
+
+#endif

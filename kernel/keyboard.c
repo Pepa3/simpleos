@@ -3,13 +3,13 @@
 // http://wiki.osdev.org/Interrupts#From_the_keyboard.27s_perspective
 // We need to handle this interrupt and do something
 
-#include "include/keyboard.h"
-#include "include/screen.h"
-#include "include/ports.h"
-#include "include/isr.h"
-#include "include/function.h"
-#include "include/string.h"
-#include "include/kernel.h"
+#include <keyboard.h>
+#include <screen.h>
+#include <ports.h>
+#include <isr.h>
+#include <function.h>
+#include <string.h>
+#include <kernel.h>
 
 #define BACKSPACE 0x0E
 #define ENTER 0x1C
@@ -147,8 +147,10 @@ static void keyboard_callback(registers_t regs) {
 
   if (scancode > SC_MAX) return;
   if (scancode == BACKSPACE) {
+    if(key_buffer[0]!='\0'){
+      print_backspace();
+    }
     backspace(key_buffer);
-    print_backspace();
   } else if (scancode == ENTER) {
     print("\n");
     user_input(key_buffer);

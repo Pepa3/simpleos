@@ -1,4 +1,4 @@
-C_SOURCES = $(wildcard kernel/*.c)
+C_SOURCES = $(wildcard kernel/*.c kernel/std/*.c)
 HEADERS = $(wildcard kernel/include/*.h)
 OBJ = ${C_SOURCES:.c=.o}
 
@@ -15,7 +15,7 @@ kernel.bin: asm/kernel_entry.o asm/interrupt.o ${OBJ}
 	ld -o $@ -Ttext 0x1000 -melf_i386 $^ --oformat binary
 
 %.o: %.c ${HEADERS}
-	gcc -g -fno-pic -ffreestanding -nostdinc -m32 -Wall -Wextra -c $< -o $@ 
+	gcc -g -fno-pic -ffreestanding -nostdinc -m32 -Ikernel/include/ -Wall -Wextra -c $< -o $@ 
 
 %.o: %.asm
 	nasm $< -f elf32 -o $@
@@ -25,4 +25,4 @@ kernel.bin: asm/kernel_entry.o asm/interrupt.o ${OBJ}
 
 clean:
 	rm -fr *.bin *.dis *.o os-image
-	rm -fr kernel/*.o asm/*.bin asm/*.o
+	rm -fr kernel/*.o asm/*.bin asm/*.o kernel/std/*.o
