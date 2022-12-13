@@ -1,6 +1,6 @@
 #ifndef SCREEN_H_INC
 #define SCREEN_H_INC
-#include "stdint.h"
+#include <stdint.h>
 
 // Address in memory which is mapped to video
 #define VIDEO_ADDRESS 0xB8000
