@@ -1,5 +1,5 @@
 #ifndef STDBOOL_H_INC
 #define STDBOOL_H_INC
-#define true true
-#define false false
+#define true 1
+#define false 0
 #endif
