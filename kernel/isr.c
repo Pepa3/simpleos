@@ -7,7 +7,7 @@
 #include <timer.h>
 #include <keyboard.h>
 #include <screen.h>
-#include <mem.h>
+#include <memory.h>
 #include <string.h>
 
 isr_t interrupt_handlers[256];
@@ -127,7 +127,7 @@ void isr_handler(registers_t r) {
   char s[3];
 
   print("Received interrupt: ");
-  itoa(r.int_no, s);
+  itoa(r.int_no,16, s);
   print(s);
   print("\n");
   print(exception_messages[r.int_no]);
