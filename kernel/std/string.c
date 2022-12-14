@@ -1,18 +1,37 @@
 #include <string.h>
 
-void itoa(int n, char str[]) {
-  int i, sign;
+char tbuf[32];
+char bchars[] = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 
-  if ((sign = n) < 0) n = -n;
-  i = 0;
-  do {
-    str[i++] = n % 10 + '0';
-  } while ((n /= 10) > 0);
+void itoa(unsigned int i,unsigned int base,char* buf) {
+	int pos = 0;
+	int opos = 0;
+	int top = 0;
 
-  if (sign < 0) str[i++] = '-';
-  str[i] = '\0';
+	if (i == 0 || base > 16) {
+		buf[0] = '0';
+		buf[1] = '\0';
+		return;
+	}
 
-  reverse(str);
+	while (i != 0) {
+		tbuf[pos] = bchars[i % base];
+		pos++;
+		i /= base;
+	}
+	top=pos--;
+	for (opos=0; opos<top; pos--,opos++)
+		buf[opos] = tbuf[pos];
+	buf[opos] = 0;
+}
+
+void itoa_s(int i,unsigned int base,char* buf) {
+   if (base > 16) return;
+   if (i < 0) {
+      *buf++ = '-';
+      i *= -1;
+   }
+   itoa(i,base,buf);
 }
 
 void reverse(char s[]) {
