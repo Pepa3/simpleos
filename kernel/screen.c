@@ -4,7 +4,7 @@
 
 #include <screen.h>
 #include <ports.h>
-#include <mem.h>
+#include <memory.h>
 #include <stddef.h>
 
 // Prints string at current position of the cursor
@@ -79,9 +79,9 @@ int print_char(char character, int col, int row, int attribute) {
     // In case, if we out of bounds
     // Copy each line to a line above
     for (int i = 1; i < MAX_ROWS; i++) {
-      memory_copy(
-        (uint8_t*)(get_offset(0, i) + VIDEO_ADDRESS),
+      memcpy(
         (uint8_t*)(get_offset(0, i - 1) + VIDEO_ADDRESS),
+        (uint8_t*)(get_offset(0, i) + VIDEO_ADDRESS),
         MAX_COLS * 2
       );
     }
