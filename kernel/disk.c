@@ -219,13 +219,15 @@ uint8_t ata_read_one(uint8_t *buf, uint32_t lba, device_t *dev)
 	return 1;
 }
 
-void ata_read(uint8_t *buf, uint32_t lba, uint32_t numsects, device_t *dev)
-{
+uint8_t ata_read(uint8_t *buf, uint32_t lba, uint32_t numsects, device_t *dev)
+{	
+	uint8_t status = 1;
 	for(uint32_t i = 0; i < numsects; i++)
 	{
-		ata_read_one(buf, lba + i, dev);
+		status &= ata_read_one(buf, lba + i, dev);
 		buf += 512;
 	}
+	return status;
 }
 
 device_t* ata_probe()
