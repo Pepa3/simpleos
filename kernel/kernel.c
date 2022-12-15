@@ -7,7 +7,7 @@
 #include <memory.h>
 #include <exceptions.h>
 
-extern uint32_t kernel_end;
+//extern uint32_t kernel_end;
 
 void kernel_main() {
   clear_screen();
@@ -16,11 +16,11 @@ void kernel_main() {
   set_cursor_offset(0);
   print("Type something, it will go through the kernel\n");
   print("Type END to halt the CPU\n> ");
-  printf("A string: %s\nA decimal: %d\nA hex-value: %x\nA character: %c","World",123, 0xabc,'X');
+  printf("A string: %s\nA decimal: %d\nA hex-value: %x\nA character: %c\n","World",123, 0xabc,'X');
   
   exceptions_init();
-  mm_init(kernel_end);
-  ata_init();
+  mm_init(0x30000);
+  //ata_init();
 }
 
 void user_input(char *input) {
