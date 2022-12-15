@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <stddef.h>
+#include <stdint.h>
 
 void printf(char* str,...){
 	va_list ap;
@@ -30,7 +31,7 @@ void printf(char* str,...){
 				}
 				case 'x': {
 					int c = va_arg(ap, int);
-					char str2[32]= {0};
+					char str2[32] = {0};
 					itoa(c, 16, str2);
 					print(str2);
 					i++;

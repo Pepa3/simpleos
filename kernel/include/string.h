@@ -1,7 +1,7 @@
 #ifndef STRING_H_INC
 #define STRING_H_INC
-void itoa(unsigned i,unsigned base,char* buf);
-void itoa_s(int i,unsigned base,char* buf);
+void itoa(unsigned int i, unsigned int base, char* buf);
+void itoa_s(int i, unsigned int base, char* buf);
 void reverse(char s[]);
 int strlen(char s[]);
 void backspace(char s[]);
