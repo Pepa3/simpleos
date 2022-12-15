@@ -22,7 +22,7 @@ load_kernel:
 mov bx, MSG_LOAD_KERNEL
 call print_string
 mov bx, KERNEL_OFFSET   ; Set - up parameters for our disk_load routine , so
-mov dh, 20              ; that we load the first 20 sectors (excluding // 20 - 0x2800
+mov dh, 50              ; that we load the first 20 sectors (excluding // 20 - 0x2800
 mov dl, [BOOT_DRIVE]    ; the boot sector) from the boot disk (i.e. our
 call disk_load          ; kernel code) to address KERNEL_OFFSET
 ret
