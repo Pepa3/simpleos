@@ -15,7 +15,7 @@ os-image: asm/main.bin kernel.bin
 	cat $^ > os-image
 
 kernel.bin: asm/kernel_entry.o asm/interrupt.o ${OBJ}
-	ld -o $@ -Ttext 0x1000 -melf_i386 $^ --oformat binary
+	ld -o $@ -Tlink.ld -melf_i386 $^ --oformat binary
 
 %.o: %.c ${HEADERS}
 	gcc -g -fno-pic -ffreestanding -nostdinc -m32 -I./kernel/include -Wall -Wno-unused-variable -c $< -o $@ 

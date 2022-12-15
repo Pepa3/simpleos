@@ -7,7 +7,9 @@
 #include <memory.h>
 #include <exceptions.h>
 
-//extern uint32_t kernel_end;
+extern uint32_t kernel_end;//found in linker script
+device_t* primary_disk;
+int n = 0;
 
 void kernel_main() {
   clear_screen();
@@ -16,20 +18,28 @@ void kernel_main() {
   set_cursor_offset(0);
   print("Type something, it will go through the kernel\n");
   print("Type END to halt the CPU\n> ");
-  printf("A string: %s\nA decimal: %d\nA hex-value: %x\nA character: %c\n","World",123, 0xabc,'X');
+  //printf("A string: %s\nA decimal: %d\nA hex-value: %x\nA character: %c\n","World",123, 0xabc,'X');
   
   exceptions_init();
-  mm_init(0x30000);
-  //ata_init();
+  mm_init(kernel_end);
+  primary_disk = ata_init();
+  
 }
 
 void user_input(char *input) {
-  if (strcmp(input, "END") == 0) {
+  if(strcmp(input, "END") == 0) {
     print("Stopping the CPU. Bye!\n");
     __asm__ __volatile__("hlt");
+
+  }else if(strcmp(input, "READ") == 0){
+    uint8_t buf[512];
+    primary_disk->read(buf,n++,1,primary_disk);
+    for(int i=0;i<512;i++){
+      printf("%x",*(buf+i));
+    }
+
+  }else{
+    printf("Command %s not found\n",input);
   }
 
-  print("You said: ");
-  print(input);
-  print("\n> ");
 }
