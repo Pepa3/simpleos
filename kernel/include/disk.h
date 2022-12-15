@@ -82,10 +82,46 @@
 #define      ATA_READ      0x00
 #define      ATA_WRITE     0x013
 
+
+#define ATA_PRIMARY_IO 0x1F0
+#define ATA_SECONDARY_IO 0x170
+
+#define ATA_PRIMARY_DCR_AS 0x3F6
+#define ATA_SECONDARY_DCR_AS 0x376
+
+#define ATA_PRIMARY_IRQ 14
+#define ATA_SECONDARY_IRQ 15
+
+#define PIC_MASTER_CMD 0x20
+#define PIC_MASTER_DATA 0x21
+#define PIC_SLAVE_CMD 0xA0
+#define PIC_SLAVE_DATA 0xA1
+#define PIC_CMD_EOI 0x20
+
+#define send_eoi(irq)if(irq >= 8){port_byte_out(PIC_SLAVE_CMD, PIC_CMD_EOI);\
+	port_byte_out(PIC_MASTER_CMD, PIC_CMD_EOI);}
+
+typedef enum __device_type {
+	DEVICE_UNKNOWN = 0,
+	DEVICE_CHAR = 1,
+	DEVICE_BLOCK = 2,
+} device_type;
+
+
+typedef struct __device_t {
+	char *name;
+	uint32_t unique_id;
+	device_type dev_type;
+	struct __fs_t *fs;
+	uint8_t (*read)(uint8_t* buffer, uint32_t offset , uint32_t len, void* dev);
+	uint8_t (*write)(uint8_t *buffer, uint32_t offset, uint32_t len, void* dev);
+	void *priv;
+} device_t;
+
 typedef struct {
 	uint8_t drive;
 } ide_private_data;
 
-extern void ata_init();
+device_t* ata_init();
 
 #endif
