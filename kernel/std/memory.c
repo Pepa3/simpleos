@@ -43,7 +43,7 @@ void free(void *mem)
 
 void pfree(void *mem)
 {
-	if(mem < pheap_begin || mem > pheap_end) return;
+	if((uint32_t)mem < pheap_begin || (uint32_t)mem > pheap_end) return;
 	/* Determine which page is it */
 	uint32_t ad = (uint32_t)mem;
 	ad -= pheap_begin;
@@ -53,7 +53,7 @@ void pfree(void *mem)
 	return;
 }
 
-char* pmalloc(size_t size)
+uint8_t* pmalloc(size_t size)
 {
 	/* Loop through the avail_list */
 	for(int i = 0; i < MAX_PAGE_ALIGNED_ALLOCS; i++)
@@ -61,13 +61,13 @@ char* pmalloc(size_t size)
 		if(pheap_desc[i]) continue;
 		pheap_desc[i] = 1;
 		printf("PAllocated from 0x%x to 0x%x\n", pheap_begin + i*4096, pheap_begin + (i+1)*4096);
-		return (char *)(pheap_begin + i*4096);
+		return (uint8_t *)(pheap_begin + i*4096);
 	}
 	print("pmalloc: FATAL: failure!\n");
 	return 0;
 }
 
-char* malloc(size_t size)
+uint8_t* malloc(size_t size)
 {
 	if(!size) return 0;
 
@@ -100,7 +100,7 @@ char* malloc(size_t size)
 			printf("RE:Allocated %d bytes from 0x%x to 0x%x\n", size, mem + sizeof(alloc_t), mem + sizeof(alloc_t) + size);
 			memset(mem + sizeof(alloc_t), 0, size);
 			memory_used += size + sizeof(alloc_t);
-			return (char *)(mem + sizeof(alloc_t));
+			return (uint8_t *)(mem + sizeof(alloc_t));
 		}
 		/* If it isn't allocated, but the size is not good, then
 		 * add its size and the sizeof alloc_t to the pointer and
@@ -127,7 +127,7 @@ char* malloc(size_t size)
 	printf("Allocated %d bytes from 0x%x to 0x%x\n", size, (uint32_t)alloc + sizeof(alloc_t), last_alloc);
 	memory_used += size + 4 + sizeof(alloc_t);
 	memset((char *)((uint32_t)alloc + sizeof(alloc_t)), 0, size);
-	return (char *)((uint32_t)alloc + sizeof(alloc_t));
+	return (uint8_t *)((uint32_t)alloc + sizeof(alloc_t));
 /*
 	char* ret = (char*)last_alloc;
 	last_alloc += size;
@@ -140,13 +140,15 @@ char* malloc(size_t size)
 	return ret;*/
 }
 
-void memcpy(uint8_t *destination, uint8_t *source, int bytes) {
-  for (int i = 0; i < bytes; i++) {
-    *(destination + i) = *(source + i);
+void memcpy(uint8_t* dest, const uint8_t* src, size_t num) {
+  for (int i = 0; i < num; i++) {
+    *(dest + i) = *(src + i);
+	//dest[i] = src[i];
   }
+  //return dest or src?
 }
 
-void memset(uint8_t *destination, uint8_t value, uint32_t len) {
-  uint8_t *temp = (uint8_t*)destination;
-  for (; len != 0; len--) *temp++ = value;
+void memset(void * ptr, int value, size_t num) {
+  uint8_t *temp = (uint8_t*)ptr;
+  for (; num != 0; num--) *temp++ = value;
 }
