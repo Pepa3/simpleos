@@ -14,7 +14,7 @@
 #define BACKSPACE 0x0E
 #define ENTER 0x1C
 
-static char key_buffer[256];
+char key_buffer[256];
 
 #define SC_MAX 57
 
@@ -163,6 +163,14 @@ static void keyboard_callback(registers_t regs) {
   }
 
   UNUSED(regs);
+}
+
+void clear_keyboard_buffer(){
+  for (size_t i = 0; i < 256; i++)
+  {
+    key_buffer[i]=0x0;
+  }
+  
 }
 
 // Maps keyboard_callback() to IRQ1 interrupt
