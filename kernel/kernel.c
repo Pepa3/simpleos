@@ -7,23 +7,21 @@
 #include <memory.h>
 #include <exceptions.h>
 
-#define kernel_end 55*0x200 //number of sectors we read
-device_t* primary_disk;
+#define kernel_end VIDEO_ADDRESS //probably the best address for now
+device_t* main_disk;
 int n = 0;
 
 void kernel_main() {
   clear_screen();
+  set_cursor_offset(0);
   isr_install();
   irq_install();
-  set_cursor_offset(0);
-  print("Type something, it will go through the kernel\n");
-  print("Type END to halt the CPU\n> ");
-  //printf("A string: %s\nA decimal: %d\nA hex-value: %x\nA character: %c\n","World",123, 0xabc,'X');
-  
   exceptions_init();
   mm_init(kernel_end);
-  primary_disk = ata_init();
-  
+  ata_init();
+  main_disk = get_disk(1);
+
+  print("Kernel initialized\n> ");
 }
 
 void user_input(char *input) {
@@ -33,13 +31,27 @@ void user_input(char *input) {
 
   }else if(strcmp(input, "READ") == 0){
     uint8_t buf[512];
-    primary_disk->read(buf,n++,1,primary_disk);
+    main_disk->read(buf,n++,1,main_disk);
     for(int i=0;i<512;i++){
       printf("%x",*(buf+i));
     }
 
+  }else if(strcmp(input, "TEST") == 0){
+    printf("Test #1: free, malloc\n");
+    for (size_t i = 0; i < 100; i++){
+      uint8_t * buf = malloc(200*i);
+      for (size_t j = 0; j < 200*i; j++)
+      {
+        buf[j] = 0xff;
+      }
+      
+      free(buf);
+    }
+    free(malloc(123));
+
   }else{
     printf("Command %s not found\n",input);
   }
+  printf("\n> ");
 
 }

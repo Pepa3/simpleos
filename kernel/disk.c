@@ -15,6 +15,8 @@ uint8_t ata_ss = 0; /* Secondary slave exists? */
 
 uint8_t *ide_buf = 0;
 
+device_t* disks[4];//PM,PS,SM,SS
+
 void ide_select_drive(uint8_t bus, uint8_t i)
 {
 	if(bus == ATA_PRIMARY)
@@ -64,7 +66,7 @@ uint8_t ide_identify(uint8_t bus, uint8_t drive)
 	if(status)
 	{
 		/* Now, poll untill BSY is clear. */
-		while(port_byte_in(io + ATA_REG_STATUS) & ATA_SR_BSY != 0) ;
+		while((port_byte_in(io + ATA_REG_STATUS) & ATA_SR_BSY) != 0) ;
 pm_stat_read:		status = port_byte_in(io + ATA_REG_STATUS);
 		if(status & ATA_SR_ERR)
 		{
@@ -143,7 +145,7 @@ uint8_t ata_read_one(uint8_t *buf, uint32_t lba, device_t *dev)
 	}
 	//print("io=0x%x %s\n", io, drive==ATA_MASTER?"Master":"Slave");
 	uint8_t cmd = (drive==ATA_MASTER?0xE0:0xF0);
-	uint8_t slavebit = (drive == ATA_MASTER?0x00:0x01);
+	//uint8_t slavebit = (drive == ATA_MASTER?0x00:0x01);
 	/*print("LBA = 0x%x\n", lba);
 	print("LBA>>24 & 0x0f = %d\n", (lba >> 24)&0x0f);
 	print("(uint8_t)lba = %d\n", (uint8_t)lba);
@@ -195,12 +197,11 @@ uint8_t ata_read(uint8_t *buf, uint32_t lba, uint32_t numsects, device_t *dev)
 	return status;
 }
 
-device_t* ata_probe()
+void ata_probe()
 {
 	/* First check the primary bus,
 	 * and inside the master drive.
 	 */
-	device_t* dev2;
 	if(ide_identify(ATA_PRIMARY, ATA_MASTER))
 	{
 		ata_pm = 1;
@@ -221,13 +222,52 @@ device_t* ata_probe()
 		dev->priv = priv;
 		dev->read = ata_read;
 		//device_add(dev);
-		dev2 = dev;
+		disks[0]=dev;
 		printf("Device: %s\n", dev->name);
 	}
-	ide_identify(ATA_PRIMARY, ATA_SLAVE);
+	if(ide_identify(ATA_PRIMARY, ATA_SLAVE))
+	{
+		ata_ps = 1;
+		device_t *dev = (device_t *)malloc(sizeof(device_t));
+		ide_private_data *priv = (ide_private_data *)malloc(sizeof(ide_private_data));
+		/* Now, process the IDENTIFY data */
+		/* Model goes from W#27 to W#46 */
+		char *str = (char *)malloc(40);
+		for(int i = 0; i < 40; i += 2)
+		{
+			str[i] = ide_buf[ATA_IDENT_MODEL + i + 1];
+			str[i + 1] = ide_buf[ATA_IDENT_MODEL + i];
+		}
+		dev->name = str;
+		dev->unique_id = 32;
+		dev->dev_type = DEVICE_BLOCK;
+		priv->drive = (ATA_PRIMARY << 1) | ATA_SLAVE;
+		dev->priv = priv;
+		dev->read = ata_read;
+		//device_add(dev);
+		disks[1]=dev;
+		printf("Device: %s\n", dev->name);
+	}
 	/*ide_identify(ATA_SECONDARY, ATA_MASTER);
 	ide_identify(ATA_SECONDARY, ATA_SLAVE);*/
-	return dev2;
+}
+
+device_t* get_disk(int n){
+	if(n<0 || n>3){return NULL;}
+
+	if((n==0) & ata_pm){
+		return disks[0];
+
+	}else if((n==1) & ata_ps){
+		return disks[1];
+
+	}else if((n==2) & ata_sm){
+		return disks[2];
+
+	}else if((n==3) & ata_ss){
+		return disks[3];
+	}
+	return NULL;
 }
 
 device_t* ata_init()
@@ -236,5 +276,6 @@ device_t* ata_init()
 	ide_buf = malloc(512);
 	register_interrupt_handler(ATA_PRIMARY_IRQ, ide_primary_irq);
 	register_interrupt_handler(ATA_SECONDARY_IRQ, ide_secondary_irq);
-	return ata_probe();
+	ata_probe();
+	return disks[0];
 }
