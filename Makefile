@@ -5,20 +5,20 @@ OBJ = ${C_SOURCES:.c=.o}
 build: os-image
 
 run: os-image
-	qemu-system-x86_64 -drive file=os-image,format=raw
+	qemu-system-x86_64 os-image -drive file=disk.img,format=raw,index=1
 
 disasm: os-image kernel.bin
 	ndisasm os-image > os-image.dis
 	ndisasm kernel.bin > kernel.dis
 
-os-image: asm/main.bin kernel.bin
+os-image: asm/main.bin kernel.bin disk.img
 	cat $^ > os-image
 
 kernel.bin: asm/kernel_entry.o asm/interrupt.o ${OBJ}
-	ld -o $@ -Ttext 0x1000 -melf_i386 $^ --oformat binary
+	ld.lld -o $@ -Ttext 0x1000 --strip-all -melf_i386 $^ --oformat binary
 
 %.o: %.c ${HEADERS}
-	gcc -g -fno-pic -ffreestanding -nostdinc -m32 -I./kernel/include -Wall -Wno-unused-variable -c $< -o $@ 
+	clang -g -fno-pic -ffreestanding -nostdinc -Oz -m32 -I./kernel/include -Wall -Wextra -c $< -o $@ 
 
 %.o: %.asm
 	nasm $< -f elf32 -o $@
