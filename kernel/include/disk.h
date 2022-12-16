@@ -124,5 +124,7 @@ typedef struct {
 
 device_t* ata_init();
 device_t* get_disk(int n);
+uint8_t ata_write_one(uint16_t* buf, uint32_t lba, device_t *dev);
+uint8_t ata_read(uint16_t *buf, uint32_t lba, uint32_t numsects, device_t *dev);
 
 #endif

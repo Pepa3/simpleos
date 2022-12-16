@@ -8,8 +8,7 @@
 #include <exceptions.h>
 
 #define kernel_end VIDEO_ADDRESS //probably the best address for now
-device_t* main_disk;
-int n = 0;
+int a,b,c,d,e,f = 0;
 
 void kernel_main() {
   clear_screen();
@@ -19,9 +18,9 @@ void kernel_main() {
   exceptions_init();
   mm_init(kernel_end);
   ata_init();
-  main_disk = get_disk(1);
 
   print("Kernel initialized\n> ");
+  //clear_keyboard_buffer();
 }
 
 void user_input(char *input) {
@@ -30,24 +29,17 @@ void user_input(char *input) {
     __asm__ __volatile__("hlt");
 
   }else if(strcmp(input, "READ") == 0){
-    uint8_t buf[512];
-    main_disk->read(buf,n++,1,main_disk);
-    for(int i=0;i<512;i++){
+    uint16_t buf[256];
+    ata_read(buf,0,1,get_disk(1));
+    for(int i=0;i<256;i++){
       printf("%x",*(buf+i));
     }
 
   }else if(strcmp(input, "TEST") == 0){
-    printf("Test #1: free, malloc\n");
-    for (size_t i = 0; i < 100; i++){
-      uint8_t * buf = malloc(200*i);
-      for (size_t j = 0; j < 200*i; j++)
-      {
-        buf[j] = 0xff;
-      }
-      
-      free(buf);
-    }
-    free(malloc(123));
+    printf("Testing experimental feature...\n");
+    uint16_t buf[256];
+    ata_read(buf,0,1,get_disk(0));
+    ata_write_one(buf,0,get_disk(1));
 
   }else{
     printf("Command %s not found\n",input);

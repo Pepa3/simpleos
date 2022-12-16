@@ -115,7 +115,7 @@ retry2:	status = port_byte_in(io + ATA_REG_STATUS);
 	return;
 }
 
-uint8_t ata_read_one(uint8_t *buf, uint32_t lba, device_t *dev)
+uint8_t ata_read_one(uint16_t *buf, uint32_t lba, device_t *dev)
 {
 	//lba &= 0x00FFFFFF; // ignore topmost byte
 	/* We only support 28bit LBA so far */
@@ -178,15 +178,83 @@ uint8_t ata_read_one(uint8_t *buf, uint32_t lba, device_t *dev)
 	//set_task(0);
 	for(int i = 0; i < 256; i++)
 	{
-		uint16_t data = port_word_in(io + ATA_REG_DATA);
-		*(uint16_t *)(buf + i * 2) = data;
+		buf[i] = port_word_in(io + ATA_REG_DATA);
 	}
 	ide_400ns_delay(io);
 	//set_task(1);
 	return 1;
 }
 
-uint8_t ata_read(uint8_t *buf, uint32_t lba, uint32_t numsects, device_t *dev)
+uint8_t ata_write_one(uint16_t* buf, uint32_t lba, device_t *dev){
+	//lba &= 0x00FFFFFF; // ignore topmost byte
+	/* We only support 28bit LBA so far */
+	uint8_t drive = ((ide_private_data *)(dev->priv))->drive;
+	uint16_t io = 0;
+	switch(drive)
+	{
+		case (ATA_PRIMARY << 1 | ATA_MASTER):
+			io = ATA_PRIMARY_IO;
+			drive = ATA_MASTER;
+			break;
+		case (ATA_PRIMARY << 1 | ATA_SLAVE):
+			io = ATA_PRIMARY_IO;
+			drive = ATA_SLAVE;
+			break;
+		case (ATA_SECONDARY << 1 | ATA_MASTER):
+			io = ATA_SECONDARY_IO;
+			drive = ATA_MASTER;
+			break;
+		case (ATA_SECONDARY << 1 | ATA_SLAVE):
+			io = ATA_SECONDARY_IO;
+			drive = ATA_SLAVE;
+			break;
+		default:
+			print("FATAL: unknown drive!\n");
+			return 0;
+	}
+	//print("io=0x%x %s\n", io, drive==ATA_MASTER?"Master":"Slave");
+	uint8_t cmd = (drive==ATA_MASTER?0xE0:0xF0);
+	//uint8_t slavebit = (drive == ATA_MASTER?0x00:0x01);
+	/*print("LBA = 0x%x\n", lba);
+	print("LBA>>24 & 0x0f = %d\n", (lba >> 24)&0x0f);
+	print("(uint8_t)lba = %d\n", (uint8_t)lba);
+	print("(uint8_t)(lba >> 8) = %d\n", (uint8_t)(lba >> 8));
+	print("(uint8_t)(lba >> 16) = %d\n", (uint8_t)(lba >> 16));*/
+	//port_byte_out(io + ATA_REG_HDDEVSEL, cmd | ((lba >> 24)&0x0f));
+	port_byte_out(io + ATA_REG_HDDEVSEL, (cmd | (uint8_t)((lba >> 24 & 0x0F))));
+	//print("issued 0x%x to 0x%x\n", (cmd | (lba >> 24)&0x0f), io + ATA_REG_HDDEVSEL);
+	//for(int k = 0; k < 10000; k++) ;
+	port_byte_out(io + 1, 0x00);
+	//print("issued 0x%x to 0x%x\n", 0x00, io + 1);
+	//for(int k = 0; k < 10000; k++) ;
+	port_byte_out(io + ATA_REG_SECCOUNT0, 1);
+	//print("issued 0x%x to 0x%x\n", (uint8_t) numsects, io + ATA_REG_SECCOUNT0);
+	//for(int k = 0; k < 10000; k++) ;
+	port_byte_out(io + ATA_REG_LBA0, (uint8_t)((lba)));
+	//print("issued 0x%x to 0x%x\n", (uint8_t)((lba)), io + ATA_REG_LBA0);
+	//for(int k = 0; k < 10000; k++) ;
+	port_byte_out(io + ATA_REG_LBA1, (uint8_t)((lba) >> 8));
+	//print("issued 0x%x to 0x%x\n", (uint8_t)((lba) >> 8), io + ATA_REG_LBA1);
+	//for(int k = 0; k < 10000; k++) ;
+	port_byte_out(io + ATA_REG_LBA2, (uint8_t)((lba) >> 16));
+	//print("issued 0x%x to 0x%x\n", (uint8_t)((lba) >> 16), io + ATA_REG_LBA2);
+	//for(int k = 0; k < 10000; k++) ;
+	port_byte_out(io + ATA_REG_COMMAND, ATA_CMD_WRITE_PIO);
+	//print("issued 0x%x to 0x%x\n", ATA_CMD_READ_PIO, io + ATA_REG_COMMAND);
+
+	ide_poll(io);
+
+	//set_task(0);
+	for(int i = 0; i < 256; i++)
+	{
+		port_word_out(io + ATA_REG_DATA,buf[i]);
+	}
+	ide_400ns_delay(io);
+	//set_task(1);
+	return 1;
+}
+
+uint8_t ata_read(uint16_t *buf, uint32_t lba, uint32_t numsects, device_t *dev)
 {	
 	uint8_t status = 1;
 	for(uint32_t i = 0; i < numsects; i++)
@@ -221,6 +289,7 @@ void ata_probe()
 		priv->drive = (ATA_PRIMARY << 1) | ATA_MASTER;
 		dev->priv = priv;
 		dev->read = ata_read;
+		dev->write = ata_write_one;
 		//device_add(dev);
 		disks[0]=dev;
 		printf("Device: %s\n", dev->name);
@@ -244,6 +313,7 @@ void ata_probe()
 		priv->drive = (ATA_PRIMARY << 1) | ATA_SLAVE;
 		dev->priv = priv;
 		dev->read = ata_read;
+		dev->write = ata_write_one;
 		//device_add(dev);
 		disks[1]=dev;
 		printf("Device: %s\n", dev->name);
