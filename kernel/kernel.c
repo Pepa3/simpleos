@@ -7,7 +7,7 @@
 #include <memory.h>
 #include <exceptions.h>
 
-extern uint32_t kernel_end;//found in linker script
+#define kernel_end 55*0x200 //number of sectors we read
 device_t* primary_disk;
 int n = 0;
 
