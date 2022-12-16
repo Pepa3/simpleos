@@ -18,7 +18,6 @@
 #define REG_SCREEN_CTRL 0x3D4
 #define REG_SCREEN_DATA 0x3D5
 
-// Public API
 void print(char *message);
 void print_at(char *message, int col, int row);
 void print_backspace();

@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#define is_tasking() false
+#define is_tasking() true
 #define p_name() "KERNEL"
 #define p_pid() 0
 

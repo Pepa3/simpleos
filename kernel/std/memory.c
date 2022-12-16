@@ -53,20 +53,6 @@ void pfree(void *mem)
 	return;
 }
 
-uint8_t* pmalloc(size_t size)
-{
-	/* Loop through the avail_list */
-	for(int i = 0; i < MAX_PAGE_ALIGNED_ALLOCS; i++)
-	{
-		if(pheap_desc[i]) continue;
-		pheap_desc[i] = 1;
-		printf("PAllocated from 0x%x to 0x%x\n", pheap_begin + i*4096, pheap_begin + (i+1)*4096);
-		return (uint8_t *)(pheap_begin + i*4096);
-	}
-	print("pmalloc: FATAL: failure!\n");
-	return 0;
-}
-
 uint8_t* malloc(size_t size)
 {
 	if(!size) return 0;
@@ -141,7 +127,7 @@ uint8_t* malloc(size_t size)
 }
 
 void memcpy(uint8_t* dest, const uint8_t* src, size_t num) {
-  for (int i = 0; i < num; i++) {
+  for (size_t i = 0; i < num; i++) {
     *(dest + i) = *(src + i);
 	//dest[i] = src[i];
   }

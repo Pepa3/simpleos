@@ -15,7 +15,6 @@ void mm_print_out();
 void paging_init();
 void paging_map_virtual_to_phys(uint32_t virt, uint32_t phys);
 
-uint8_t* pmalloc(size_t size); /* page aligned alloc */
 uint8_t* malloc(size_t size);
 void free(void *mem);
 
