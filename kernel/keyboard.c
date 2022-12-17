@@ -165,6 +165,17 @@ static void keyboard_callback(registers_t regs) {
   UNUSED(regs);
 }
 
+char keyboard_get_key()
+{
+	char c = 0;
+	c = *key_buffer;
+	for(int i = 0; i < 256; i++)
+	{
+		key_buffer[i] = key_buffer[i+1];
+	}
+	return c;
+}
+
 void clear_keyboard_buffer(){
   for (size_t i = 0; i < 256; i++)
   {
