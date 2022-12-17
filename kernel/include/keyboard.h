@@ -4,5 +4,6 @@
 
 void init_keyboard();
 void clear_keyboard_buffer();
+char keyboard_get_key();
 
 #endif
