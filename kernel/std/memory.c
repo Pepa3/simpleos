@@ -83,7 +83,7 @@ uint8_t* malloc(size_t size)
 			/* Set to allocated */
 			a->status = 1;
 
-			printf("RE:Allocated %d bytes from 0x%x to 0x%x\n", size, mem + sizeof(alloc_t), mem + sizeof(alloc_t) + size);
+			//printf("RE:Allocated %d bytes from 0x%x to 0x%x\n", size, mem + sizeof(alloc_t), mem + sizeof(alloc_t) + size);
 			memset(mem + sizeof(alloc_t), 0, size);
 			memory_used += size + sizeof(alloc_t);
 			return (uint8_t *)(mem + sizeof(alloc_t));
