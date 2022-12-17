@@ -38,7 +38,6 @@ idt_gate_t idt[IDT_ENTRIES];
 // Declare structure with info about IDT location
 idt_register_t idt_reg;
 
-// Public API
 void set_idt_gate(int n, uint32_t handler);
 void set_idt();
 #endif

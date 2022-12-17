@@ -54,6 +54,11 @@ char *exception_messages[] = {
 
 // Maps ISR in interrupt.asm to gates in IDT
 void isr_install() {
+
+  /*for(uint8_t i = 0; i < 255; i++)
+	{
+		set_idt_gate(i, (uint32_t)irq15);
+	}*/
   set_idt_gate(0, (uint32_t)isr0);
   set_idt_gate(1, (uint32_t)isr1);
   set_idt_gate(2, (uint32_t)isr2);
@@ -125,7 +130,7 @@ void isr_install() {
 // This function is available in interrupt.asm file via extern in asm
 void isr_handler(registers_t r) {
   char s[3];
-
+  
   print("Received interrupt: ");
   itoa(r.int_no,16, s);
   print(s);
