@@ -115,9 +115,9 @@ retry2:	status = port_byte_in(io + ATA_REG_STATUS);
 	return;
 }
 
-uint8_t ata_read_one(uint16_t *buf, uint32_t lba, device_t *dev)
+uint8_t ata_read_one(uint16_t *buf, uint32_t offset, device_t *dev)
 {
-	//lba &= 0x00FFFFFF; // ignore topmost byte
+	//offset &= 0x00FFFFFF; // ignore topmost byte
 	/* We only support 28bit LBA so far */
 	uint8_t drive = ((ide_private_data *)(dev->priv))->drive;
 	uint16_t io = 0;
@@ -146,14 +146,14 @@ uint8_t ata_read_one(uint16_t *buf, uint32_t lba, device_t *dev)
 	//print("io=0x%x %s\n", io, drive==ATA_MASTER?"Master":"Slave");
 	uint8_t cmd = (drive==ATA_MASTER?0xE0:0xF0);
 	//uint8_t slavebit = (drive == ATA_MASTER?0x00:0x01);
-	/*print("LBA = 0x%x\n", lba);
-	print("LBA>>24 & 0x0f = %d\n", (lba >> 24)&0x0f);
-	print("(uint8_t)lba = %d\n", (uint8_t)lba);
-	print("(uint8_t)(lba >> 8) = %d\n", (uint8_t)(lba >> 8));
-	print("(uint8_t)(lba >> 16) = %d\n", (uint8_t)(lba >> 16));*/
-	//port_byte_out(io + ATA_REG_HDDEVSEL, cmd | ((lba >> 24)&0x0f));
-	port_byte_out(io + ATA_REG_HDDEVSEL, (cmd | (uint8_t)((lba >> 24 & 0x0F))));
-	//print("issued 0x%x to 0x%x\n", (cmd | (lba >> 24)&0x0f), io + ATA_REG_HDDEVSEL);
+	/*print("offset = 0x%x\n", offset);
+	print("offset>>24 & 0x0f = %d\n", (offset >> 24)&0x0f);
+	print("(uint8_t)offset = %d\n", (uint8_t)offset);
+	print("(uint8_t)(offset >> 8) = %d\n", (uint8_t)(offset >> 8));
+	print("(uint8_t)(offset >> 16) = %d\n", (uint8_t)(offset >> 16));*/
+	//port_byte_out(io + ATA_REG_HDDEVSEL, cmd | ((offset >> 24)&0x0f));
+	port_byte_out(io + ATA_REG_HDDEVSEL, (cmd | (uint8_t)((offset >> 24 & 0x0F))));
+	//print("issued 0x%x to 0x%x\n", (cmd | (offset >> 24)&0x0f), io + ATA_REG_HDDEVSEL);
 	//for(int k = 0; k < 10000; k++) ;
 	port_byte_out(io + 1, 0x00);
 	//print("issued 0x%x to 0x%x\n", 0x00, io + 1);
@@ -161,14 +161,14 @@ uint8_t ata_read_one(uint16_t *buf, uint32_t lba, device_t *dev)
 	port_byte_out(io + ATA_REG_SECCOUNT0, 1);
 	//print("issued 0x%x to 0x%x\n", (uint8_t) numsects, io + ATA_REG_SECCOUNT0);
 	//for(int k = 0; k < 10000; k++) ;
-	port_byte_out(io + ATA_REG_LBA0, (uint8_t)((lba)));
-	//print("issued 0x%x to 0x%x\n", (uint8_t)((lba)), io + ATA_REG_LBA0);
+	port_byte_out(io + ATA_REG_LBA0, (uint8_t)((offset)));
+	//print("issued 0x%x to 0x%x\n", (uint8_t)((offset)), io + ATA_REG_LBA0);
 	//for(int k = 0; k < 10000; k++) ;
-	port_byte_out(io + ATA_REG_LBA1, (uint8_t)((lba) >> 8));
-	//print("issued 0x%x to 0x%x\n", (uint8_t)((lba) >> 8), io + ATA_REG_LBA1);
+	port_byte_out(io + ATA_REG_LBA1, (uint8_t)((offset) >> 8));
+	//print("issued 0x%x to 0x%x\n", (uint8_t)((offset) >> 8), io + ATA_REG_LBA1);
 	//for(int k = 0; k < 10000; k++) ;
-	port_byte_out(io + ATA_REG_LBA2, (uint8_t)((lba) >> 16));
-	//print("issued 0x%x to 0x%x\n", (uint8_t)((lba) >> 16), io + ATA_REG_LBA2);
+	port_byte_out(io + ATA_REG_LBA2, (uint8_t)((offset) >> 16));
+	//print("issued 0x%x to 0x%x\n", (uint8_t)((offset) >> 16), io + ATA_REG_LBA2);
 	//for(int k = 0; k < 10000; k++) ;
 	port_byte_out(io + ATA_REG_COMMAND, ATA_CMD_READ_PIO);
 	//print("issued 0x%x to 0x%x\n", ATA_CMD_READ_PIO, io + ATA_REG_COMMAND);
@@ -185,8 +185,8 @@ uint8_t ata_read_one(uint16_t *buf, uint32_t lba, device_t *dev)
 	return 1;
 }
 
-uint8_t ata_write_one(uint16_t* buf, uint32_t lba, device_t *dev){
-	//lba &= 0x00FFFFFF; // ignore topmost byte
+uint8_t ata_write_one(uint16_t* buf, uint32_t offset, device_t *dev){
+	//offset &= 0x00FFFFFF; // ignore topmost byte
 	/* We only support 28bit LBA so far */
 	uint8_t drive = ((ide_private_data *)(dev->priv))->drive;
 	uint16_t io = 0;
@@ -215,14 +215,14 @@ uint8_t ata_write_one(uint16_t* buf, uint32_t lba, device_t *dev){
 	//print("io=0x%x %s\n", io, drive==ATA_MASTER?"Master":"Slave");
 	uint8_t cmd = (drive==ATA_MASTER?0xE0:0xF0);
 	//uint8_t slavebit = (drive == ATA_MASTER?0x00:0x01);
-	/*print("LBA = 0x%x\n", lba);
-	print("LBA>>24 & 0x0f = %d\n", (lba >> 24)&0x0f);
-	print("(uint8_t)lba = %d\n", (uint8_t)lba);
-	print("(uint8_t)(lba >> 8) = %d\n", (uint8_t)(lba >> 8));
-	print("(uint8_t)(lba >> 16) = %d\n", (uint8_t)(lba >> 16));*/
-	//port_byte_out(io + ATA_REG_HDDEVSEL, cmd | ((lba >> 24)&0x0f));
-	port_byte_out(io + ATA_REG_HDDEVSEL, (cmd | (uint8_t)((lba >> 24 & 0x0F))));
-	//print("issued 0x%x to 0x%x\n", (cmd | (lba >> 24)&0x0f), io + ATA_REG_HDDEVSEL);
+	/*print("LBA = 0x%x\n", offset);
+	print("LBA>>24 & 0x0f = %d\n", (offset >> 24)&0x0f);
+	print("(uint8_t)offset = %d\n", (uint8_t)offset);
+	print("(uint8_t)(offset >> 8) = %d\n", (uint8_t)(offset >> 8));
+	print("(uint8_t)(offset >> 16) = %d\n", (uint8_t)(offset >> 16));*/
+	//port_byte_out(io + ATA_REG_HDDEVSEL, cmd | ((offset >> 24)&0x0f));
+	port_byte_out(io + ATA_REG_HDDEVSEL, (cmd | (uint8_t)((offset >> 24 & 0x0F))));
+	//print("issued 0x%x to 0x%x\n", (cmd | (offset >> 24)&0x0f), io + ATA_REG_HDDEVSEL);
 	//for(int k = 0; k < 10000; k++) ;
 	port_byte_out(io + 1, 0x00);
 	//print("issued 0x%x to 0x%x\n", 0x00, io + 1);
@@ -230,14 +230,14 @@ uint8_t ata_write_one(uint16_t* buf, uint32_t lba, device_t *dev){
 	port_byte_out(io + ATA_REG_SECCOUNT0, 1);
 	//print("issued 0x%x to 0x%x\n", (uint8_t) numsects, io + ATA_REG_SECCOUNT0);
 	//for(int k = 0; k < 10000; k++) ;
-	port_byte_out(io + ATA_REG_LBA0, (uint8_t)((lba)));
-	//print("issued 0x%x to 0x%x\n", (uint8_t)((lba)), io + ATA_REG_LBA0);
+	port_byte_out(io + ATA_REG_LBA0, (uint8_t)((offset)));
+	//print("issued 0x%x to 0x%x\n", (uint8_t)((offset)), io + ATA_REG_LBA0);
 	//for(int k = 0; k < 10000; k++) ;
-	port_byte_out(io + ATA_REG_LBA1, (uint8_t)((lba) >> 8));
-	//print("issued 0x%x to 0x%x\n", (uint8_t)((lba) >> 8), io + ATA_REG_LBA1);
+	port_byte_out(io + ATA_REG_LBA1, (uint8_t)((offset) >> 8));
+	//print("issued 0x%x to 0x%x\n", (uint8_t)((offset) >> 8), io + ATA_REG_LBA1);
 	//for(int k = 0; k < 10000; k++) ;
-	port_byte_out(io + ATA_REG_LBA2, (uint8_t)((lba) >> 16));
-	//print("issued 0x%x to 0x%x\n", (uint8_t)((lba) >> 16), io + ATA_REG_LBA2);
+	port_byte_out(io + ATA_REG_LBA2, (uint8_t)((offset) >> 16));
+	//print("issued 0x%x to 0x%x\n", (uint8_t)((offset) >> 16), io + ATA_REG_LBA2);
 	//for(int k = 0; k < 10000; k++) ;
 	port_byte_out(io + ATA_REG_COMMAND, ATA_CMD_WRITE_PIO);
 	//print("issued 0x%x to 0x%x\n", ATA_CMD_READ_PIO, io + ATA_REG_COMMAND);
@@ -254,12 +254,23 @@ uint8_t ata_write_one(uint16_t* buf, uint32_t lba, device_t *dev){
 	return 1;
 }
 
-uint8_t ata_read(uint16_t *buf, uint32_t lba, uint32_t numsects, device_t *dev)
+uint8_t ata_read(uint16_t *buf, uint32_t offset, uint32_t numsects, device_t *dev)
 {	
 	uint8_t status = 1;
 	for(uint32_t i = 0; i < numsects; i++)
 	{
-		status &= ata_read_one(buf, lba + i, dev);
+		status &= ata_read_one(buf, offset + i, dev);
+		buf += 512;
+	}
+	return status;
+}
+
+uint8_t ata_write(uint16_t *buf, uint32_t offset, uint32_t numsects, device_t *dev)
+{	
+	uint8_t status = 1;
+	for(uint32_t i = 0; i < numsects; i++)
+	{
+		status &= ata_write_one(buf, offset + i, dev);
 		buf += 512;
 	}
 	return status;
