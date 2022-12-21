@@ -6,13 +6,18 @@
 #include <ports.h>
 #include <function.h>
 
-uint32_t tick = 0;
+volatile uint32_t tick = 0;
 
 // Callback for timer
 // Triggers each time when hardware interrupt occurred
 static void timer_callback(registers_t regs) {
   tick++;
   UNUSED(regs);
+}
+
+void wait(int ticks) {
+  int start = tick;
+  while(tick<(uint32_t)(start+ticks));
 }
 
 // Initialize PIC
