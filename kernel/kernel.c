@@ -8,22 +8,29 @@
 #include <exceptions.h>
 #include <argparser.h>
 #include <syscalls.h>
+#include <paging.h>
+#include <timer.h>
 
 #define kernel_end VIDEO_ADDRESS //probably the best address for now
+#define END asm volatile("hlt");
 int a,b,c,d,e,f = 0;
 
 void kernel_main() {
   clear_screen();
   set_cursor_offset(0);
+  mm_init(kernel_end);
   isr_install();
   irq_install();
   exceptions_init();
-  mm_init(kernel_end);
   ata_init();
+  paging_init();
   syscall_init();
 
-  print("Kernel initialized\n> ");
-  //clear_keyboard_buffer();
+  print("Kernel Initialized!");
+  wait(1);// 1 sec
+  clear_screen();
+
+  printf("> ");
 }
 
 void user_input(char *input) {
@@ -32,9 +39,11 @@ void user_input(char *input) {
 
   if(strcmp(args->str, "END") == 0) {
     print("Stopping the CPU. Bye!\n");
-    __asm__ __volatile__("hlt");
+    asm volatile("hlt");
 
   }else if(strcmp(args->str, "READ") == 0){
+    if(args->next==0){printf("Please provide disk number"); goto end;}
+
     int diskn = 1;
     if(args->next->str){
       if(strcmp(args->next->str,"0")){ // disk 0
@@ -43,6 +52,7 @@ void user_input(char *input) {
         diskn = 1;
       }
     }
+    
     uint16_t buf[256];
     ata_read(buf,0,1,get_disk(diskn));
     for(int i=0;i<256;i++){
@@ -55,17 +65,11 @@ void user_input(char *input) {
     ata_write(buf,0,1,get_disk(1));
 
   }else if(strcmp(args->str, "TEST") == 0){
-   /* uint16_t* buf = (uint16_t*)malloc(16*256*2);
-    ata_read(buf,0,16,get_disk(1));*/
-    char* buf = "Hello";
-	  asm volatile("int $45": :"a"(4), "b"(0), "c"(buf), "d"(6)); // doesnt work
-	  //asm volatile("int $0x80": :);
-
-   /* int i = atoi(args->next->str, 10);
-    printf("%d",i);*/
+    printf("Test");
   }else{
     printf("Command %s not found\n",args->str);
   }
+  end:
   printf("\n> ");
   free_args(args);
 }
