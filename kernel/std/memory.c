@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <memory.h>
 
@@ -41,8 +42,7 @@ void free(void *mem)
 	alloc->status = 0;
 }
 
-void pfree(void *mem)
-{
+void pfree(void *mem){
 	if((uint32_t)mem < pheap_begin || (uint32_t)mem > pheap_end) return;
 	/* Determine which page is it */
 	uint32_t ad = (uint32_t)mem;
@@ -51,6 +51,20 @@ void pfree(void *mem)
 	/* Now, ad has the id of the page */
 	pheap_desc[ad] = 0;
 	return;
+}
+
+char* pmalloc(size_t size)
+{
+	/* Loop through the avail_list */
+	for(int i = 0; i < MAX_PAGE_ALIGNED_ALLOCS; i++)
+	{
+		if(pheap_desc[i]) continue;
+		pheap_desc[i] = 1;
+		printf("PAllocated from 0x%x to 0x%x\n", pheap_begin + i*4096, pheap_begin + (i+1)*4096);
+		return (char *)(pheap_begin + i*4096);
+	}
+	printf("pmalloc: FATAL: failure!\n");
+	return 0;
 }
 
 uint8_t* malloc(size_t size)

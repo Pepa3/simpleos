@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-typedef struct {
+typedef struct alloc_t{
 	uint8_t status;
 	uint32_t size;
 } alloc_t;
@@ -16,6 +16,8 @@ void paging_init();
 void paging_map_virtual_to_phys(uint32_t virt, uint32_t phys);
 
 uint8_t* malloc(size_t size);
+char* pmalloc(size_t size);
+void pfree(void *mem);
 void free(void *mem);
 
 
